@@ -1,0 +1,187 @@
+---
+title: 'Day 3, exercsie 1: Age-specific decomposition of a difference between life expectancies and lifespan variations'
+output: html_document
+date: '2022-05-07'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The aim of this exercise is to apply the linear integral model proposed by Horiuchi et al (2008). The example is applied to life expectancy and lifespan variation for Mexican males. The aim is to quantify the contribution of age-specific mortality changes to differences in both these measures between 2005 and 2015.
+
+The dataset contains lifetable and cause of death data for Mexican men over age 15 for the years 2005 and 2015. Names 1:10 are ten exhaustive and exclusive, assumed to be independent, cause-of-death groups. However, in this exercise we will focus on all-cause mortality. The data and analyses come from Aburto and Beltrán-Sánchez (2019).
+
+First load the data and the necessary packages. We also load a separate script, which contains some functions and information we will need later on.
+
+```{r, message=FALSE}
+load('MexicoMen.RData')
+
+library(DemoDecomp)
+library(tidyverse)
+
+source("Functions_D3.R")
+```
+
+Following the method, we require two vectors of rates: one for 2005 and one for 2015.
+
+```{r}
+# first we need to vectors of mortality rates
+mx1 <- data %>% 
+  filter(year==2005) %>% 
+  pull(mx)
+mx2 <- data %>% 
+  filter(year==2015) %>% 
+  pull(mx)
+```
+
+Luckily for us Tim Riffe released a package in CRAN (DemoDecomp), which contains a number of useful decomposition functions. You can check the algorithm for the continuous change method by calling the right function.
+
+```{r}
+#load some functions and some info for graphs
+horiuchi
+```
+
+In order to use this function, we need to define another function, which estimates the summary indicator from a vector of covariates (age-cause specific rates in our case). Let us first start with life expectancy. Here is the needed function.
+
+```{r}
+e0.frommx
+```
+
+Now we can perform the decomposition following the arguments of the function. We’ll get a vector with the age-specific contributions to the change in life expectancy.
+
+```{r}
+#Now we can perfom the decomposition
+results <- horiuchi(func = e0.frommx, pars1 = mx1, pars2 = mx2, N = 100)
+```
+
+Let's have a look at the results.
+
+```{r}
+results
+```
+
+Check consistency with the original difference in life expectancy.
+
+```{r}
+#original
+(original <- e0.frommx(mx2) - e0.frommx(mx1))
+#with decomp
+(with.decomp <- sum(results))
+```
+
+Just do the difference and you will get the error term.
+
+```{r}
+#error
+with.decomp - original
+```
+
+Finally, graph and interpret the results.
+
+```{r}
+#now graph results
+age <- data %>% 
+  filter(year==2005) %>% 
+  pull(age)
+
+ggplot()+
+ggtitle(bquote(~'Change in '~ e[15] ~'2005-2015' ))+
+geom_bar(aes(x = age, y= results), stat = "identity", position = "stack")
+```
+
+Let's do the same with lifespan disparity
+
+```{r}
+edagger.frommx
+
+#Now we can perfom the decomposition
+results_edag <- horiuchi(func = edagger.frommx, pars1 = mx1, pars2 = mx2, N = 100)
+```
+
+Let's have a look at the results.
+
+```{r}
+results_edag
+```
+
+Check consistency with the original difference in life expectancy.
+
+```{r}
+#original
+(original <- edagger.frommx(mx2) - edagger.frommx(mx1))
+#with decomp
+(with.decomp <- sum(results_edag))
+
+#error
+with.decomp - original
+```
+
+Finally, graph and interpret the results.
+
+```{r}
+#now graph results
+ggplot()+
+ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' )) +
+geom_bar(aes(x = age, y= results_edag), stat = "identity", position = "stack")
+```
+
+The continuous change method is just one of those that exist. We can obtain very similar results with the stepwise replacement method, also included in the DemoDecomp package. Let's look at the algorithm.
+
+```{r}
+stepwise_replacement
+```
+
+Now let's get the results. We can use the same life expectancy and lifespan disparity functions as before.
+
+```{r}
+# Life expectancy
+results_step <- stepwise_replacement(e0.frommx,pars1 = mx1, pars2 = mx2)
+
+#original
+(original <- e0.frommx(mx2) - e0.frommx(mx1))
+
+#with decomp
+(with.decomp_step <- sum(results_step))
+
+#error
+with.decomp_step - original
+
+#now graph results
+ggplot()+
+ggtitle(bquote(~'Change in '~ e[15] ~'2005-2015' ))+
+geom_bar(aes(x = age, y= results_step), stat = "identity", position = "stack")
+```
+
+How different are these results from the ones we obtained with the continuous change method?
+```{r}
+results - results_step
+```
+
+Let's do the same for lifespan disparity
+
+```{r}
+results_step_edag <- stepwise_replacement(edagger.frommx,pars1 = mx1, pars2 = mx2)
+
+#original
+(original <- edagger.frommx(mx2) - edagger.frommx(mx1))
+
+#with decomp
+(with.decomp_step <- sum(results_step_edag))
+
+#error
+with.decomp_step - original
+
+#now graph results
+
+ggplot()+
+ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' ))+
+geom_bar(aes(x = age, y= results_step_edag), stat = "identity", position = "stack")
+```
+
+Difference between contiinuous change and stepwise replacement
+
+```{r}
+results_edag - results_step_edag
+```
+
