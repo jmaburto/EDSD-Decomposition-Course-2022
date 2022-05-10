@@ -1,0 +1,178 @@
+---
+title: 'Day 3, exercise 2: Extending to cause specific results'
+output: pdf_document
+date: '2022-05-07'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In exercise 4, we decomposed life expectancy and lifespan disparity by age. Now, we will extend the decomposition by also considering cause of death. We will use the same data, packages and functions as before.
+
+Let's load them.
+```{r, message=FALSE}
+load('MexicoMen.RData')
+
+library(DemoDecomp)
+library(tidyverse)
+
+source("Functions_D3.R")
+```
+
+Following the method, we require two matrices of rates: one for 2005 and one for 2015, both by age (rows) and cause of death (column)
+```{r}
+#we need age-cause specific mortality rates in each period
+COD1 <- data %>% 
+  filter(year==2005) %>% 
+  select(Cause_1:Cause_9) %>% 
+  as.matrix()
+
+COD2 <- data %>% 
+  filter(year==2015) %>% 
+  select(Cause_1:Cause_9) %>% 
+  as.matrix()
+```
+
+
+We cannot directly use the same functions to calucalte life expectancy and lifespan disparity. Rather, we need functions that can estimate life expectancy and lifespan dispairty from age- and cause-specific death rates. They are also included in the functions script. Let's have a look.
+
+```{r}
+e0.frommxc
+
+edagger.frommxc
+```
+
+Now we can perform the decomposition and check the results
+
+```{r}
+results <- horiuchi(func = e0.frommxc, pars1 = c(COD1), pars2 = c(COD2), N = 100)
+
+#Go back to a matrix
+dim(results) <- dim(COD1)
+results
+
+#original
+(original <- e0.frommxc(COD2) - e0.frommxc(COD1))
+
+#with decomp
+(with.decomp <- sum(results))
+
+#error
+with.decomp - original
+```
+Do some data handling to have a nice dataset.
+
+```{r}
+results <- data.frame(results)
+colnames(results) <- cause_names
+results$age <- 16:109
+results <- gather(data = results,key = cause,value = contribution,-age)
+```
+
+Finally, graph and interpret the results.
+
+```{r}
+#now graph results
+ggplot(data=results, aes(x=as.factor(age), y=contribution, fill=cause)) +
+  ggtitle(bquote(~'Change in '~ e[15] ~'2005-2015' )) +
+  geom_bar(stat = "identity", position = "stack")
+
+```
+
+
+Now for lifespan disparity
+
+```{r}
+#Now we can perfom the decomposition
+results_edag <- horiuchi(func = edagger.frommxc, pars1 = c(COD1), pars2 = c(COD2), N = 100)
+```
+
+Go back to a matrix
+
+```{r}
+#Go back to a matrix
+dim(results_edag) <- dim(COD1)
+
+#original
+(original_edag <- edagger.frommxc(COD2) - edagger.frommxc(COD1))
+
+#with decomp
+(with.decomp_edag <- sum(results_edag))
+#error
+with.decomp_edag - original_edag
+```
+
+Do some data handling to have a nice dataset and plotting
+
+```{r}
+results_edag <- data.frame(results_edag)
+colnames(results_edag) <- cause_names
+results_edag$age <- 16:109
+results_edag <- gather(data = results_edag,key = cause,value = contribution,-age)
+
+#now graph results
+
+ggplot(data=results_edag, aes(x=as.factor(age), y=contribution, fill=cause)) +
+  ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' )) +
+  geom_bar(stat = "identity", position = "stack")
+```
+
+Let's do the same thing with the stepwise replacement method
+
+First, life expectancy
+```{r}
+results_step <- stepwise_replacement(func = e0.frommxc, pars1 = c(COD1), pars2 = c(COD2))
+
+#Go back to a matrix
+dim(results_step) <- dim(COD1)
+
+#original
+(original <- e0.frommxc(COD2) - e0.frommxc(COD1))
+
+#with decomp
+(with.decomp <- sum(results_step))
+
+#error
+with.decomp - original
+
+results_step <- data.frame(results_step)
+colnames(results_step) <- cause_names
+results_step$age <- 16:109
+results_step <- gather(data = results_step,key = cause,value = contribution,-age)
+
+#now graph results
+ggplot(data=results_step, aes(x=as.factor(age), y=contribution, fill=cause)) +
+  ggtitle(bquote(~'Change in '~ e[15] ~'2005-2015' )) +
+  geom_bar(stat = "identity", position = "stack")
+
+```
+
+
+Now for lifespan disparity
+
+```{r}
+#Now we can perfom the decomposition
+results_step_edag <- stepwise_replacement(func = edagger.frommxc, pars1 = c(COD1), pars2 = c(COD2))
+
+#Go back to a matrix
+dim(results_step_edag) <- dim(COD1)
+
+#original
+(original_edag <- edagger.frommxc(COD2) - edagger.frommxc(COD1))
+
+#with decomp
+(with.decomp_edag <- sum(results_step_edag))
+#error
+with.decomp_edag - original_edag
+
+results_step_edag <- data.frame(results_step_edag)
+colnames(results_step_edag) <- cause_names
+results_step_edag$age <- 16:109
+results_step_edag <- gather(data = results_step_edag,key = cause,value = contribution,-age)
+
+#now graph results
+ggplot(data=results_step_edag, aes(x=as.factor(age), y=contribution, fill=cause)) +
+  ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' )) +
+  geom_bar(stat = "identity", position = "stack")
+```
