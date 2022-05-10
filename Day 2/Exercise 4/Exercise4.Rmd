@@ -1,0 +1,75 @@
+---
+title: 'Day 2, exercise 2: Estimating healthy life expectancy with the SUllivan method'
+output: pdf_document
+date: '2022-05-10'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this exercise, we will see how to use the Sullivan method to estimate healthy life expectancy. We will calculate life expectancy and healthy life expectancy for women aged 50 in Spain between 2010 and 2015.
+
+The dataset "SullivanData.RData" contains death rates (from the HMD) and the proportion of people with activity limitations (from the Statistics on Income and Living Conditions (SILC), as reported by the EurOHex website (http://www.eurohex.eu/)). These are the only data we need to use the Sullivan method.
+
+Let's load the data, packages and functions.
+
+```{r, message=F}
+load("SullivanData.RData")
+
+library(tidyverse)
+library(viridis)
+```
+
+Let's have a look at the dataset.
+
+```{r}
+data
+```
+
+In order to obtain the healthy life expectancy, we need to calculate the number of years lived in good health, in our case, without activity limitations.
+
+```{r}
+data <- data %>%
+  mutate(Lx_healthy = Lx*(1-prevalence))
+```
+
+From here, we apply lifetable formulas to obtain the healthy life expectancy.
+
+```{r}
+data <- data %>%
+  group_by(year,country) %>% 
+  mutate(Tx_healthy = rev(cumsum(rev(Lx_healthy))),
+         ex_healthy = Tx_healthy/lx) %>% 
+  ungroup()
+```
+
+Let's plot healthy life expectancy at age 50.
+
+```{r, message=F}
+data %>% 
+  filter(age=="50-54") %>% 
+  ggplot() + 
+  geom_point(aes(x=year, y=ex_healthy, shape=country)) +
+  geom_smooth(aes(x=year, y=ex_healthy, linetype=country), se=F)
+
+```
+
+How does healthy life expectancy compare with life expectancy?
+
+First, we need to turn the data in long format, because ggplot doe snot accept wide datasets.
+
+```{r, message=F}
+data_ex <- data %>% 
+  pivot_longer(cols=c("ex","ex_healthy"), names_to="type", values_to="ex")
+
+data_ex %>% 
+  filter(age=="50-54") %>% 
+  ggplot(aes(x=year, y=ex, colour=type)) + 
+  geom_point(aes(shape=country)) +
+  geom_smooth(aes(linetype=country), se=F) +
+  scale_colour_viridis_d(option="H")
+```
+
+
+
