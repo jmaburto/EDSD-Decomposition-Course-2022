@@ -65,6 +65,12 @@ e0.frommx <- function(nmx =  mx, sex=1, nax = NULL){
   return(e0)
 }
 
+e0.frommxc <- function(mxcvec,sex=1){
+  dim(mxcvec) <- c(110,length(mxcvec)/110)
+  mx          <- rowSums(mxcvec)
+  e0.frommx(mx,sex)
+}
+
 # Lifespan disparity
 edagger.frommx <- function(mx,sex=1){
   i.openage <- length(mx)
@@ -111,7 +117,7 @@ AKm02a0 <- function(m0, sex = "m"){
 }
 
 
-edaggerfrommxc <- function(mxcvec,sex=1){
+edagger.frommxc <- function(mxcvec,sex=1){
   dim(mxcvec) <- c(110,length(mxcvec)/110)
   mx          <- rowSums(mxcvec)
   edagger.frommx(mx,sex)
