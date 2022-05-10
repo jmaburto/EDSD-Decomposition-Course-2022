@@ -1,0 +1,138 @@
+---
+title: 'Day 4, exercise 1: Decomposing healthy life expectancy differences'
+output: pdf_document
+date: '2022-05-10'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+In this exercise we will reproduce the results of van Raalte and Nepomuceno (2020), using the code they provide. The aim is to decompose the changes in female healthy life expectancy over age 65 in the USA between 1970 and 1990.
+
+The data contain information on prevalence of institutionalisation (from Crimmins, 1997) and mortality (from the HMD) by five-year age groups.
+
+First load the data
+NB: here we provide the data, but van Raalte and Nepomuceno also show how to extract data from the HMD and change the open age group. 
+```{r message=FALSE}
+load('vanRaalteNepomuceno.RData')
+
+library(DemoDecomp)
+library(tidyverse)
+
+source("Functions_D4.R")
+```
+
+We have a function to obtain healthy life expectancy using the Sullivan method. Letøs take a look
+```{r}
+#we need age-cause specific mortality rates in each period
+Sullivan.fun
+```
+
+Let's use it, now.
+NB: this function requires a vector with death rates and disability prevalences together
+```{r}
+start.age <- 65
+open.age <- 85
+
+# First year
+mx1 <- data %>% 
+  filter(year==1970) %>% 
+  pull(mx)
+wx1 <- data %>% 
+  filter(year==1970) %>% 
+  pull(wx)
+mxwx1 <- c(mx1,wx1)
+
+healthyex1 <- Sullivan.fun(rates=mxwx1)
+
+# Second year
+mx2 <- data %>% 
+  filter(year==1990) %>% 
+  pull(mx)
+wx2 <- data %>% 
+  filter(year==1990) %>% 
+  pull(wx)
+mxwx2 <- c(mx2,wx2)
+
+healthyex2 <- Sullivan.fun(rates=mxwx2)
+
+# Difference
+(healthyex2 - healthyex1)
+
+# We can compare this difference with the one in period life expectancy, directly from the HMD
+filter(data, year==1990,age==65) %>% pull(ex) - filter(data, year==1970,age==65) %>% pull(ex)
+
+```
+What does this tell us about the improvement in mortality and morbity for US women between 1970 and 1990?
+
+Now let's see how each age contributed to the changes in healthy life expectancy, using both the continuous change and the stepwise functions in the DemoDecomp package
+```{r}
+results_cont <- horiuchi(
+func=Sullivan.fun,
+pars1 = mxwx1,
+pars2 = mxwx2,
+N=100)
+
+results_sw <- stepwise_replacement(
+func=Sullivan.fun,
+pars1 = mxwx1,
+pars2 = mxwx2)
+
+```
+
+
+Go back to a matrix and add the ages
+```{r}
+HE_cont <- as.data.frame(matrix(c(seq(start.age,open.age,5),results_cont),nrow=(length(results_cont)/2),ncol=3,
+byrow=F))
+
+HE_sw <- as.data.frame(matrix(c(seq(start.age,open.age,5),results_sw),nrow=(length(results_sw)/2),ncol=3,
+byrow=F))
+
+colnames(HE_sw) <- colnames(HE_cont) <- c("age","mortality","morbidity")
+```
+
+Because ggplot requires long data formats, we need to reshape the two dataframes
+```{r}
+HE_cont <- HE_cont %>%
+  pivot_longer(cols=c("mortality","morbidity"),names_to="type",values_to="contribution" )
+
+HE_sw <- HE_sw %>% 
+  pivot_longer(cols=c("mortality","morbidity"),names_to="type",values_to="contribution" )
+```
+
+Let's check that the decomspositionsn yielded realistic results
+
+```{r}
+sum(HE_cont$contribution)
+
+sum(HE_sw$contribution) 
+
+Sullivan.fun(rates=mxwx2)-Sullivan.fun(rates=mxwx1)
+```
+
+Now let's plot the results
+
+```{r}
+# Continuous change decomposition
+
+ggplot(data=HE_cont, aes(x=as.factor(age), y=contribution, fill=type)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_hline(yintercept=0, linetype= "dashed", color = "gray50", size=0.5) +
+  scale_x_discrete(labels=c("65-69", "70-74", "75-79", "80-84", "85+")) +
+  scale_fill_viridis_d(option="H")
+
+```
+
+```{r}
+# Stepwise replacement decomposition
+
+ggplot(data=HE_sw, aes(x=as.factor(age), y=contribution, fill=type)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_hline(yintercept=0, linetype= "dashed", color = "gray50", size=0.5) +
+  scale_x_discrete(labels=c("65-69", "70-74", "75-79", "80-84", "85+")) +
+  scale_fill_viridis_d(option="H")
+
+```
