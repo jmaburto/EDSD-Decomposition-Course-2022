@@ -2,7 +2,7 @@
 # FUNCTIONS AND INFORMATION FOR DAY 3
 
 # Information for graphs
-# Labesls for causes of death
+# Labels for causes of death
 cause_names<-c("1"="Infectious and respiratory", "2"="Neoplasm","3"="Circulatory and heart",
                "4"="Birth","5"="Diabetes",
                "6"= "Homicide","7"="Other external",

@@ -3,19 +3,6 @@
 
 # Information for graphs
 # Labels for causes of death
-
-# 1. Amenable to medical service: 1+2+3+4+6
-# 2. Diabetes: 5
-# 3. IHD:7
-# 4. HIV:8
-# 5. Lung cancer: 10
-# 6. Cirrhosis: 11
-# 7. Homicide: 12
-# 8. Road traffic: 13
-# 9. Suicide: 9
-# 10. All other causes: 14+15+16
-
-
 cause_names<-c("1"="Infectious and respiratory", "2"="Neoplasm","3"="Circulatory and heart",
                "4"="Birth","5"="Diabetes",
                "6"= "Homicide","7"="Other external",
