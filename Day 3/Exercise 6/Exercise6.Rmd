@@ -12,7 +12,7 @@ In exercise 4, we decomposed life expectancy and lifespan disparity by age. Now,
 
 Let's load them.
 ```{r, message=FALSE}
-load('MexicoMen.RData')
+load('AburtoBeltranSanchez.RData')
 
 library(DemoDecomp)
 library(tidyverse)
@@ -24,12 +24,12 @@ Following the method, we require two matrices of rates: one for 2005 and one for
 ```{r}
 #we need age-cause specific mortality rates in each period
 COD1 <- data %>% 
-  filter(year==2005) %>% 
+  filter(year==2019) %>% 
   select(Cause_1:Cause_9) %>% 
   as.matrix()
 
 COD2 <- data %>% 
-  filter(year==2015) %>% 
+  filter(year==2015, age>15) %>% 
   select(Cause_1:Cause_9) %>% 
   as.matrix()
 ```

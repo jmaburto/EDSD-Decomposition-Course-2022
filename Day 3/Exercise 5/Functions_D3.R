@@ -2,23 +2,28 @@
 # FUNCTIONS AND INFORMATION FOR DAY 3
 
 # Information for graphs
-# Labesls for causes of death
+# Labels for causes of death
+
+# 1. Amenable to medical service: 1+2+3+4+6
+# 2. Diabetes: 5
+# 3. IHD:7
+# 4. HIV:8
+# 5. Lung cancer: 10
+# 6. Cirrhosis: 11
+# 7. Homicide: 12
+# 8. Road traffic: 13
+# 9. Suicide: 9
+# 10. All other causes: 14+15+16
+
+
 cause_names<-c("1"="Infectious and respiratory", "2"="Neoplasm","3"="Circulatory and heart",
                "4"="Birth","5"="Diabetes",
                "6"= "Homicide","7"="Other external",
                "8"="Other","9"="Undefined")
 
-
-# Labels for age-groups 
-age_names<-c("0"="0","1"="1-4","5"="5-9","10"="10-14","15"="15-19","20"="20-24",
-             "25"="25-29","30"="30-34","35"="35-39","40"="40-44","45"="45-49",
-             "50"="50-54","55"="55-59","60"="60-64","65"="65-69","70"="70-74",
-             "75"="75-79","80"="80-84","85"="85+")     
-
-
 # Functions to use with DemoDecomp functions
 # Life expectancy at birth
-e0.frommx <- function(nmx =  mx, sex=1, nax = NULL){
+e0.frommx <- function(nmx =  mx, sex=1, start.age=1, nax = NULL){
   age <- 0:(length(nmx)-1)
   n   <- c(diff(age), 999)
   
@@ -60,25 +65,25 @@ e0.frommx <- function(nmx =  mx, sex=1, nax = NULL){
   Tx <- rev(cumsum(rev(nLx)))
   lx <- lx[1:length(age)]
   ex <- Tx/lx
-  e0 <- ex[1]
+  e0 <- ex[start.age]
   
   return(e0)
 }
 
-e0.frommxc <- function(mxcvec,sex=1){
-  dim(mxcvec) <- c(110,length(mxcvec)/110)
+e0.frommxc <- function(mxcvec,sex=1,start.age=1){
+  dim(mxcvec) <- c(94,length(mxcvec)/94)
   mx          <- rowSums(mxcvec)
-  e0.frommx(mx,sex)
+  e0.frommx(mx,sex,start.age=start.age)
 }
 
 # Lifespan disparity
-edagger.frommx <- function(mx,sex=1){
+edagger.frommx <- function(mx,sex=1, start.age=1){
   i.openage <- length(mx)
   OPENAGE   <- i.openage - 1
   RADIX     <- 1
   if (mx[i.openage] < 0.5 | is.na(mx[i.openage])) mx[i.openage] = mx[i.openage - 1]*1.1 
   ax        <- mx * 0 + .5
-  ax[1]     <- AKm02a0(m0 = mx[1], sex = sex)
+  #ax[1]     <- AKm02a0(m0 = mx[1], sex = sex)
   ax[i.openage] <- if (mx[i.openage] == 0) 0.5 else 1/mx[i.openage]
   
   qx        <- mx / (1 + (1 - ax) * mx)
@@ -102,7 +107,7 @@ edagger.frommx <- function(mx,sex=1){
   v[length(ex)] <- ex[length(ex)]
   v <- dx*v
   e.dagger <- rev(cumsum(rev(v)))/lx
-  e.dagger[16]
+  e.dagger[start.age]
 }
 
 AKm02a0 <- function(m0, sex = "m"){
@@ -117,16 +122,18 @@ AKm02a0 <- function(m0, sex = "m"){
 }
 
 
-edagger.frommxc <- function(mxcvec,sex=1){
-  dim(mxcvec) <- c(110,length(mxcvec)/110)
+edagger.frommxc <- function(mxcvec,sex=1, start.age=1){
+  dim(mxcvec) <- c(94,length(mxcvec)/94)
   mx          <- rowSums(mxcvec)
-  edagger.frommx(mx,sex)
+  edagger.frommx(mx,sex,start.age=start.age)
 }
 
 
-function (func, pars1, pars2, N, ...) 
+# Continuous change decomposition algorithm (from DemoDecomp)
+
+decomp_cont <- function (func, pars1, pars2, N, ...) 
 {
-  y1 <- e0.frommx(pars1)
+  y1 <- func(pars1, ...)
   y2 <- func(pars2, ...)
   d <- pars2 - pars1
   n <- length(pars1)

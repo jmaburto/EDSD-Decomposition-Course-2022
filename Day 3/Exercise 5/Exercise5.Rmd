@@ -15,7 +15,7 @@ The dataset contains lifetable and cause of death data for Mexican men over age 
 First load the data and the necessary packages. We also load a separate script, which contains some functions and information we will need later on.
 
 ```{r, message=FALSE}
-load('MexicoMen.RData')
+load('AburtoBeltranSanchez.RData')
 
 library(DemoDecomp)
 library(tidyverse)
@@ -28,21 +28,21 @@ Following the method, we require two vectors of rates: one for 2005 and one for 
 ```{r}
 # first we need to vectors of mortality rates
 mx1 <- data %>% 
-  filter(year==2005) %>% 
+  filter(year==2005, age>15) %>% 
   pull(mx)
 mx2 <- data %>% 
-  filter(year==2015) %>% 
+  filter(year==2015, age>15) %>% 
   pull(mx)
 ```
 
-Luckily for us Tim Riffe released a package in CRAN (DemoDecomp), which contains a number of useful decomposition functions. You can check the algorithm for the continuous change method by calling the right function.
+Luckily for us Tim Riffe released a package in CRAN (DemoDecomp), which contains a number of useful decomposition functions. You can check the algorithm for the continuous change method by calling the right function. When looking at a function, always consider carefully the default settings, they might not be appropriate for you. 
 
 ```{r}
 #load some functions and some info for graphs
 horiuchi
 ```
 
-In order to use this function, we need to define another function, which estimates the summary indicator from a vector of covariates (age-cause specific rates in our case). Let us first start with life expectancy. Here is the needed function.
+In order to use this function, we need to define another function, which estimates the summary indicator from a vector of covariates (age-cause specific rates in our case). Let us first start with life expectancy. Here is the needed function. Take notice of the default settings, we will need to specify a different starting age.
 
 ```{r}
 e0.frommx
@@ -53,6 +53,7 @@ Now we can perform the decomposition following the arguments of the function. We
 ```{r}
 #Now we can perfom the decomposition
 results <- horiuchi(func = e0.frommx, pars1 = mx1, pars2 = mx2, N = 100)
+
 ```
 
 Let's have a look at the results.
@@ -82,7 +83,7 @@ Finally, graph and interpret the results.
 ```{r}
 #now graph results
 age <- data %>% 
-  filter(year==2005) %>% 
+  filter(year==2005, age>15) %>% 
   pull(age)
 
 ggplot()+

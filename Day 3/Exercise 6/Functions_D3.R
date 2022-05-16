@@ -8,11 +8,9 @@ cause_names<-c("1"="Infectious and respiratory", "2"="Neoplasm","3"="Circulatory
                "6"= "Homicide","7"="Other external",
                "8"="Other","9"="Undefined")
 
-
-
 # Functions to use with DemoDecomp functions
 # Life expectancy at birth
-e0.frommx <- function(nmx =  mx, sex=1, nax = NULL){
+e0.frommx <- function(nmx =  mx, sex=1, start.age=1, nax = NULL){
   age <- 0:(length(nmx)-1)
   n   <- c(diff(age), 999)
   
@@ -54,19 +52,19 @@ e0.frommx <- function(nmx =  mx, sex=1, nax = NULL){
   Tx <- rev(cumsum(rev(nLx)))
   lx <- lx[1:length(age)]
   ex <- Tx/lx
-  e0 <- ex[1]
+  e0 <- ex[start.age]
   
   return(e0)
 }
 
-e0.frommxc <- function(mxcvec,sex=1){
+e0.frommxc <- function(mxcvec,sex=1,start.age=1){
   dim(mxcvec) <- c(94,length(mxcvec)/94)
   mx          <- rowSums(mxcvec)
-  e0.frommx(mx,sex)
+  e0.frommx(mx,sex,start.age=start.age)
 }
 
 # Lifespan disparity
-edagger.frommx <- function(mx,sex=1){
+edagger.frommx <- function(mx,sex=1, start.age=1){
   i.openage <- length(mx)
   OPENAGE   <- i.openage - 1
   RADIX     <- 1
@@ -96,20 +94,33 @@ edagger.frommx <- function(mx,sex=1){
   v[length(ex)] <- ex[length(ex)]
   v <- dx*v
   e.dagger <- rev(cumsum(rev(v)))/lx
-  e.dagger[16]
+  e.dagger[start.age]
+}
+
+AKm02a0 <- function(m0, sex = "m"){
+  sex <- rep(sex, length(m0))
+  ifelse(sex == "m", 
+         ifelse(m0 < .0230, {0.14929 - 1.99545 * m0},
+                ifelse(m0 < 0.08307, {0.02832 + 3.26201 * m0},.29915)),
+         # f
+         ifelse(m0 < 0.01724, {0.14903 - 2.05527 * m0},
+                ifelse(m0 < 0.06891, {0.04667 + 3.88089 * m0}, 0.31411))
+  )
 }
 
 
-edagger.frommxc <- function(mxcvec,sex=1){
+edagger.frommxc <- function(mxcvec,sex=1, start.age=1){
   dim(mxcvec) <- c(94,length(mxcvec)/94)
   mx          <- rowSums(mxcvec)
-  edagger.frommx(mx,sex)
+  edagger.frommx(mx,sex,start.age=start.age)
 }
 
 
-function (func, pars1, pars2, N, ...) 
+# Continuous change decomposition algorithm (from DemoDecomp)
+
+decomp_cont <- function (func, pars1, pars2, N, ...) 
 {
-  y1 <- e0.frommx(pars1)
+  y1 <- func(pars1, ...)
   y2 <- func(pars2, ...)
   d <- pars2 - pars1
   n <- length(pars1)
