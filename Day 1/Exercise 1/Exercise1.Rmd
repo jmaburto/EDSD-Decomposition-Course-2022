@@ -1,6 +1,6 @@
 ---
 title: 'Day 1, exercise 1: Decomposing the crude death rate using Kitagawa decomposition'
-output: html_document
+output: pdf_document
 date: '2022-05-06'
 ---
 
@@ -21,10 +21,9 @@ Note that $D_x = M_x*N_x$ and that the difference between two crude death rates 
 \Delta CDR = \sum_x M_x(t_2)\frac{N_x(t_2)}{N(t_2)} -\sum_x M_x(t_1)\frac{N_x(t_1)}{N(t_1)}.
 \end{equation}
 
-The aim is to disentangle the effects of changing rates and the effect of the change in the composition of the
-population.
+The aim is to disentangle the effects of changing rates and the effect of the change in the composition of the population.
 
-The file Kitagawa_Data.RData contains mortality and exposure data for Israel in 1990 and 2016. The exercise consists in decomposing the changes in CDR following Kitagawa or equation (1)
+The file Kitagawa_Data.RData contains mortality and exposure data for Israel in 1990 and 2016. The exercise consists in decomposing the changes in CDR following Kitagawa.
 
 Start by loading the data.
 
@@ -42,8 +41,7 @@ We need to load this package too (and install it, if you haven't already).
 library(tidyverse)
 ```
 
-The period 1 corresponds to 1990 and period 2 to 2016 in this case. Start by selecting deaths and exposure
-(approximated usually by the midyear population) for each of the periods and store them in vectors.
+The period 1 corresponds to 1990 and period 2 to 2016 in this case. Start by selecting deaths and exposure (approximated usually by the midyear population) for each of the periods and store them in vectors.
 
 ```{r}
 # time period 1
@@ -64,24 +62,7 @@ Nx2 <- Exposures%>%
   pull(Total)
 ```
 
-Following equation one, we need to calculate the age-specific mortality rates, which is the quotient of deaths
-divided by the exposure for both periods.
-
-```{r}
-# time period 1
-# Select deaths for first period
-# get age-specific mortality rates
-Mx1 <- Dx1/Nx1
-# replace NA's with zero (just for simplicity)
-Mx1 <- Mx1 %>% 
-  replace_na(replace=0)
-# dot the same for the second period
-Mx2 <- Dx2/Nx2
-Mx2 <- Mx2 %>% 
-  replace_na(replace=0)
-```
-
-Now we have everything to calculate the crude death rate.
+We can calculate the crude death rates directly from these.
 
 ```{r}
 # get the crude death rate in time 1
@@ -92,12 +73,16 @@ CDR1*1000
 CDR2 <- sum(Dx2)/sum(Nx2)
 #crude death expressed by 1000 in time 2
 CDR2*1000
+
 #change in CDR
 (Dif <- (CDR2 - CDR1)*1000)
 ```
 
-**What would we have expected in this period? what do the CDRs suggest? Does it make sense?
+What would we have expected in this period? what do the CDRs suggest? Does it make sense?
+
 Let’s decompose and see if effectively mortality went up or if it is a compositional effect.
+
+Remember Kitagawa's formula:
 
 \begin{equation}
 \label{eq.kitagawa2}
@@ -107,6 +92,23 @@ Let’s decompose and see if effectively mortality went up or if it is a composi
 \end{split}
 \end{equation}
 
+We need to calculate the age-specific mortality rates, which are the quotient of deaths divided by the exposure for both periods.
+
+```{r}
+# time period 1
+# Select deaths for first period
+# get age-specific mortality rates
+Mx1 <- Dx1/Nx1
+# replace NA's with zero (just for simplicity)
+Mx1 <- Mx1 %>% 
+  replace_na(replace=0)
+# do the same for the second period
+Mx2 <- Dx2/Nx2
+Mx2 <- Mx2 %>% 
+  replace_na(replace=0)
+```
+
+Now let's calculate the Kitagawa's components.
 
 ```{r}
 RC <- sum(0.5*(Nx2/sum(Nx2) + Nx1/sum(Nx1))*(Mx2-Mx1))
@@ -115,8 +117,9 @@ RC*1000
 CC <- sum(0.5*(Mx2+Mx1)*(Nx2/sum(Nx2)-Nx1/sum(Nx1)))
 CC*1000
 ```
+What do they tell us about changes in mortality between 1990 and 2016? What was the role of population composition vs death rates?
 
-Compare the decomposition results with the original difference
+Let us check that the decomposition results fit with the original difference.
 
 ```{r}
 RC*1000 + CC*1000

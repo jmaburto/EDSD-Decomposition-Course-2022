@@ -1,6 +1,6 @@
 ---
 title: 'Day 2, exercise 2: Decomposing the crude marriage rate using Kitagawa decomposition'
-output: html_document
+output: pdf_document
 date: '2022-05-06'
 ---
 
@@ -16,14 +16,14 @@ In Exercise 1, we used the Kitagawa method to decompose the crude death rate by 
 * $N_x =$ is the mid-year population
 * $N = $ total population
 
-Note that $M_x = m_x*N_x$ and that the difference between two crude marriage rates can be expressed as
+Note that $m_x = M_x*N_x$ and that the difference between two crude marriage rates can be expressed as
 
 \begin{equation}
 \label{CMRDif}
-\Delta CMR = \sum_x m_x(t_2)\frac{N_x(t_2)}{N(t_2)} -\sum_x m_x(t_1)\frac{N_x(t_1)}{N(t_1)}.
+\Delta CMR = \sum_x M_x(t_2)\frac{N_x(t_2)}{N(t_2)} -\sum_x M_x(t_1)\frac{N_x(t_1)}{N(t_1)}.
 \end{equation}
 
-The file "MarriageKitagawa.RData" contains data on marriages and exposure data for Spain and the Netherlands in 2019 by country of birth (extracted from Eurostat). The exercise consists in decomposing the changes in CMR following Kitagawa or equation (1). Once again, the aim is to disentangle the contribution of changing rates and the contribution of the change in the composition of the population.
+The file "MarriageKitagawa.RData" contains data on marriages and exposure data for Spain and the Netherlands in 2019 by country of birth (extracted from Eurostat). The exercise consists in decomposing the changes in CMR following Kitagawa. Once again, the aim is to disentangle the contribution of changing rates and the contribution of the change in the composition of the population.
 
 Start by loading the data and the tidyverse package.
 
@@ -53,18 +53,6 @@ Nx_NLD <- data %>%
   pull(exposure)
 ```
 
-Following equation one, we need to calculate the country of birth-specific marriage rates, which is the quotient of marriages divided by the exposure for both countries.
-
-```{r}
-# Denmark
-# Select marriages for first period
-# get country-of-birth-specific mortality rates
-# Spain
-Mx_ESP <- mx_ESP/Nx_ESP
-# Netherlands
-Mx_NLD <- mx_NLD/Nx_NLD
-```
-
 Now we have everything to calculate the crude marriage rates.
 
 ```{r}
@@ -80,8 +68,11 @@ CMR_NLD*1000
 Dif <- (CMR_NLD - CMR_ESP)*1000
 ```
 
-**What did you expect? What do the CMRs suggest? Does it make sense?**
+What did you expect? What do the CMRs suggest? Does it make sense?
+
 Let’s decompose and see if the difference in crude marriage rates between Spain and the Netherlands is due to a compositional effect in the population or to differences in the marriage rates.
+
+Again, remember Kitagawa's formula:
 
 \begin{equation}
 \label{eq.kitagawa2}
@@ -91,6 +82,18 @@ Let’s decompose and see if the difference in crude marriage rates between Spai
 \end{split}
 \end{equation}
 
+
+We need to calculate the country of birth-specific marriage rates, which are the quotient of marriages per subpopulation divided by the exposure for both countries.
+
+```{r}
+# get country-of-birth-specific marriage rates
+# Spain
+Mx_ESP <- mx_ESP/Nx_ESP
+# Netherlands
+Mx_NLD <- mx_NLD/Nx_NLD
+```
+
+Get the components.
 
 ```{r}
 RC <- sum(0.5*(Nx_NLD/sum(Nx_NLD) + Nx_ESP/sum(Nx_ESP))*(Mx_NLD-Mx_ESP))
