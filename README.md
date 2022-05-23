@@ -49,6 +49,12 @@ Spread-Allocation-Timing decomposition
 
 Formal Demography
 
+### Challenge 1
+With data on fertility (e.g. HFD) select 3 countries and analyze the change in their crude fertility rate (CFR) in a recent period (10 years) and decompose these changes following Kitagawa's decomposition and describe your results. Then for the most recent period select the two countries (among the 3) with the highest and lowest CFR and decompose their difference and describe your results.
+
+### Challenge 2
+Challenge 2: Use prevalence lifetables (you can use data from EurOHex) and the Sullivan method to calculate healthy life expectancy for females and males in a country of your choosing. What does this tell us about morbidity and mortality for females and males? Then decompose the life expectancy sex gap by age using the Arriaga method. Which ages are driving the gap?
+
 ## Readings
 #### Day 1
 Kitagawa, Evelyn M. ‘Components of a Difference Between Two Rates’. Journal of the American Statistical Association 50, no. 272 (1955): 1168–94. https://doi.org/10.2307/2281213.
