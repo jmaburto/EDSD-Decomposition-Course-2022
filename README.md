@@ -3,9 +3,10 @@
 Start: 23/05/2022
 End: 26/05/2022
 
-Classes will start at 2.00pm (Oxford time), 3.00pm (Barcelona time), 10.00am (Sao Paulo time)
+Classes will start at 10.00am (Barcelona time)
 
 Instructor: José Manuel Aburto
+Co-Instructor: Serena Vigezzi
 
 ## Course description
 
@@ -36,6 +37,8 @@ Cause-deleted lifetables
 Lifespan variation
 
 Linear integral decomposition
+
+Stepwise decomposition method
 
 ### Day 4
 Quick review
