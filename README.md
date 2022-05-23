@@ -1,4 +1,4 @@
-# European Doctoral School of Demography 2021: Course on decomposition techniques
+# European Doctoral School of Demography 2022: Course on decomposition techniques
 
 Start: 23/05/2022
 End: 26/05/2022
