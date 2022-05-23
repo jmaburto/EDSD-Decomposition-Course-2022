@@ -1,11 +1,12 @@
-# European Doctoral School of Demography 2021: Course on decomposition techniques
+# European Doctoral School of Demography 2022: Course on decomposition techniques
 
 Start: 23/05/2022
 End: 26/05/2022
 
-Classes will start at 2.00pm (Oxford time), 3.00pm (Barcelona time), 10.00am (Sao Paulo time)
+Classes will start at 10.00am (Barcelona time)
 
 Instructor: José Manuel Aburto
+Co-Instructor: Serena Vigezzi
 
 ## Course description
 
@@ -36,6 +37,8 @@ Cause-deleted lifetables
 Lifespan variation
 
 Linear integral decomposition
+
+Stepwise decomposition method
 
 ### Day 4
 Quick review
@@ -108,10 +111,16 @@ Aburto, José Manuel, Jesús-Adrián Alvarez-Martínez, Francisco Villavicencio,
 ## Teams
 
 ### Team 1
-
+Daniela, Elizabeth, Agenese
 ### Team 2
-
+Chiara, Daniele, Mariana
 ### Team 3
-
+Abi, Rolf, Dorean
 ### Team 4 
+Saskia, Donata, Augusto
+### Team 5
+Sebastian, Teodora, Camila
+### Team 6
+Dorothee, Patrik, Nadia
+
 Students should be familiar with basic life table construction. Ideally, students should also have a basic understanding of decomposition methods. It is recommended that students read Preston et al. (2001) Chapters 2-4 prior to the commencement of the course (or an equivalent textbook covering life tables and decomposition). A basic command of R, including data handling, for-loops, and writing basic functions, is a prerequisite. 
