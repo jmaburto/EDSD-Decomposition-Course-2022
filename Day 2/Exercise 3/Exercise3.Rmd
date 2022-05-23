@@ -18,7 +18,7 @@ Let's load the data, packages and functions.
 load("SullivanData.RData")
 
 library(tidyverse)
-#library(viridis)
+library(viridis)
 ```
 
 Let's have a look at the dataset.
@@ -31,8 +31,7 @@ In order to obtain the healthy life expectancy, we need to calculate the number 
 
 ```{r}
 data <- data %>%
-  mutate(Lx_healthy = Lx*(1-prevalence),
-         lx_healhty = lx*(1-prevalence))
+  mutate(Lx_healthy = Lx*(1-prevalence))
 ```
 
 From here, we apply lifetable formulas to obtain the healthy life expectancy.
