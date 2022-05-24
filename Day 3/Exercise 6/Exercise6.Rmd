@@ -22,9 +22,9 @@ source("Functions_D3.R")
 
 Following the method, we require two matrices of rates: one for 2005 and one for 2015, both by age (rows) and cause of death (column)
 ```{r}
-#we need age-cause specific mortality rates in each period
+#we need age- and cause-specific mortality rates in each period
 COD1 <- data %>% 
-  filter(year==2019) %>% 
+  filter(year==2005, age>15) %>% 
   select(Cause_1:Cause_9) %>% 
   as.matrix()
 
@@ -41,9 +41,12 @@ We cannot directly use the same functions to calucalte life expectancy and lifes
 e0.frommxc
 
 edagger.frommxc
+sd.frommxc
+rG.frommxc
+
 ```
 
-Now we can perform the decomposition and check the results
+Now we can perform the decomposition and check the results. It might take a minute.
 
 ```{r}
 results <- horiuchi(func = e0.frommxc, pars1 = c(COD1), pars2 = c(COD2), N = 100)
@@ -66,15 +69,17 @@ Do some data handling to have a nice dataset.
 ```{r}
 results <- data.frame(results)
 colnames(results) <- cause_names
-results$age <- 16:109
-results <- gather(data = results,key = cause,value = contribution,-age)
+
+results <- results %>% 
+  mutate(age = 16:109) %>% 
+  pivot_longer(cols=1:9, names_to="cause", values_to="contribution")
 ```
 
 Finally, graph and interpret the results.
 
 ```{r}
 #now graph results
-ggplot(data=results, aes(x=as.factor(age), y=contribution, fill=cause)) +
+ggplot(data=results, aes(x=age, y=contribution, fill=cause)) +
   ggtitle(bquote(~'Change in '~ e[15] ~'2005-2015' )) +
   geom_bar(stat = "identity", position = "stack")
 
@@ -108,12 +113,14 @@ Do some data handling to have a nice dataset and plotting
 ```{r}
 results_edag <- data.frame(results_edag)
 colnames(results_edag) <- cause_names
-results_edag$age <- 16:109
-results_edag <- gather(data = results_edag,key = cause,value = contribution,-age)
+
+results_edag <- results_edag %>% 
+  mutate(age = 16:109) %>% 
+  pivot_longer(cols=1:9, names_to="cause", values_to="contribution")
 
 #now graph results
 
-ggplot(data=results_edag, aes(x=as.factor(age), y=contribution, fill=cause)) +
+ggplot(data=results_edag, aes(x=age, y=contribution, fill=cause)) +
   ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' )) +
   geom_bar(stat = "identity", position = "stack")
 ```
@@ -138,11 +145,12 @@ with.decomp - original
 
 results_step <- data.frame(results_step)
 colnames(results_step) <- cause_names
-results_step$age <- 16:109
-results_step <- gather(data = results_step,key = cause,value = contribution,-age)
+results_step <- results_step %>% 
+  mutate(age = 16:109) %>% 
+  pivot_longer(cols=1:9, names_to="cause", values_to="contribution")
 
 #now graph results
-ggplot(data=results_step, aes(x=as.factor(age), y=contribution, fill=cause)) +
+ggplot(data=results_step, aes(x=age, y=contribution, fill=cause)) +
   ggtitle(bquote(~'Change in '~ e[15] ~'2005-2015' )) +
   geom_bar(stat = "identity", position = "stack")
 
@@ -168,11 +176,12 @@ with.decomp_edag - original_edag
 
 results_step_edag <- data.frame(results_step_edag)
 colnames(results_step_edag) <- cause_names
-results_step_edag$age <- 16:109
-results_step_edag <- gather(data = results_step_edag,key = cause,value = contribution,-age)
+results_step_edag <- results_step_edag %>% 
+  mutate(age = 16:109) %>% 
+  pivot_longer(cols=1:9, names_to="cause", values_to="contribution")
 
 #now graph results
-ggplot(data=results_step_edag, aes(x=as.factor(age), y=contribution, fill=cause)) +
+ggplot(data=results_step_edag, aes(x=age, y=contribution, fill=cause)) +
   ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' )) +
   geom_bar(stat = "identity", position = "stack")
 ```

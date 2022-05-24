@@ -116,25 +116,181 @@ edagger.frommxc <- function(mxcvec,sex=1, start.age=1){
 }
 
 
+# Standard deviation
+sd.frommx <- function(mx,sex=1, age,start.age=1){
+  i.openage <- length(mx)
+  OPENAGE   <- i.openage - 1
+  RADIX     <- 1
+  if (mx[i.openage] < 0.5 | is.na(mx[i.openage])) mx[i.openage] = mx[i.openage - 1]*1.1 
+  ax        <- mx * 0 + .5
+  #ax[1]     <- AKm02a0(m0 = mx[1], sex = sex)
+  ax[i.openage] <- if (mx[i.openage] == 0) 0.5 else 1/mx[i.openage]
+  
+  qx        <- mx / (1 + (1 - ax) * mx)
+  qx[i.openage]       <- ifelse(is.na(qx[i.openage]), NA, 1)
+  
+  
+  px 				    <- 1 - qx
+  px[is.nan(px)]      <- 0
+  lx 			        <- c(RADIX, RADIX * cumprod(px[1:OPENAGE]))
+  dx 				    <- lx * qx
+  #dx[i.openage] <-0
+  Lx 				    <- lx - (1 - ax) * dx
+  Lx[i.openage ]	    <- dx[i.openage ] * ax[i.openage ]
+  Lx[is.na(Lx)] <- 0
+  Tx 				    <- c(rev(cumsum(rev(Lx[1:OPENAGE]))),0) + Lx[i.openage]
+  ex 				    <- Tx / lx
+  ex[is.na(ex)] <- 0
+  ex[i.openage] <- if (ex[OPENAGE] == 0) 0 else ax[i.openage]
+  # 
+  sd <-  sqrt(sum(dx/lx[1]*(age + ax - ex[1])^2))
+  
+  return(sd)
+}
+
+sd.frommxc <- function(mxcvec,sex=1,age,start.age=1){
+  dim(mxcvec) <- c(94,length(mxcvec)/94)
+  mx          <- rowSums(mxcvec)
+  sd.frommx(mx,sex,age=age,start.age=start.age)
+}
+
+# Relative Gini
+
+# Gini function from PASH
+Gini.fun <- function (x, nax, ndx, ex) {
+  e = rep(1, length(x))
+  D = outer(ndx, ndx)
+  x_ = x+nax
+  X_ = abs(e%*%t(x_) - x_%*%t(e))
+  G = sum(D*X_)/(2*ex[1L])
+  return(g=G)
+}
+
+
+rG.frommx <- function(mx=pars1,sex=1,age,start.age=1){
+  i.openage <- length(mx)
+  OPENAGE   <- i.openage - 1
+  RADIX     <- 1
+  if (mx[i.openage] < 0.5 | is.na(mx[i.openage])) mx[i.openage] = mx[i.openage - 1]*1.1 
+  ax        <- mx * 0 + .5
+  #ax[1]     <- AKm02a0(m0 = mx[1], sex = sex)
+  ax[i.openage] <- if (mx[i.openage] == 0) 0.5 else 1/mx[i.openage]
+  
+  qx        <- mx / (1 + (1 - ax) * mx)
+  qx[i.openage]       <- ifelse(is.na(qx[i.openage]), NA, 1)
+  
+  
+  px 				    <- 1 - qx
+  px[is.nan(px)]      <- 0
+  lx 			        <- c(RADIX, RADIX * cumprod(px[1:OPENAGE]))
+  dx 				    <- lx * qx
+  #dx[i.openage] <-0
+  Lx 				    <- lx - (1 - ax) * dx
+  Lx[i.openage ]	    <- dx[i.openage ] * ax[i.openage ]
+  Lx[is.na(Lx)] <- 0
+  Tx 				    <- c(rev(cumsum(rev(Lx[1:OPENAGE]))),0) + Lx[i.openage]
+  ex 				    <- Tx / lx
+  ex[is.na(ex)] <- 0
+  ex[i.openage] <- if (ex[OPENAGE] == 0) 0 else ax[i.openage]
+  
+  # 
+  rG <- Gini.fun(x = age,nax = ax,ndx = dx/100000,ex = ex)
+  return(rG[start.age])
+}
+
+rG.frommxc <- function(mxcvec,sex=1,age,start.age=1){
+  dim(mxcvec) <- c(94,length(mxcvec)/94)
+  mx          <- rowSums(mxcvec)
+  rG.frommx(mx,sex,age=age,start.age=start.age)
+}
+
+
 # Continuous change decomposition algorithm (from DemoDecomp)
 
 decomp_cont <- function (func, pars1, pars2, N, ...) 
 {
-  y1 <- func(pars1, ...)
-  y2 <- func(pars2, ...)
-  d <- pars2 - pars1
+  y1 <- rG.frommx(pars1,age=unique(data$age))
+  y2 <- rG.frommx(pars2,age=unique(data$age))
+  d <- pars2 - pars1 # difference between each parameter
   n <- length(pars1)
-  delta <- d/N
-  x <- pars1 + d * matrix(rep(0.5:(N - 0.5)/N, n), byrow = TRUE, 
+
+  delta <- d/N # how much of the difference we add at each iteration
+  
+  x <- pars1 + d * matrix(rep(0.5:(N - 0.5)/N, n), byrow = TRUE, # increase pars1 so it gets to the middle value of each iteration
                           ncol = N)
-  cc <- matrix(0, nrow = n, ncol = N)
+  cc <- matrix(0, nrow = n, ncol = N) # prepare results matrix
   zeros <- rep(0, n)
   for (j in 1:N) {
-    DD <- diag(delta/2)
+    DD <- diag(delta/2) # matrix to only increase the parameter we are interested in for that specific iteration
     for (i in 1:n) {
-      cc[i, j] <- func((x[, j] + DD[, i]), ...) - func((x[, 
-                                                          j] - DD[, i]), ...)
+      # calculating what the difference would be between the two aggregate measures if
+      # - the parameter of interested increased by d/N
+      # - all other parameters were fixed at the midpoint of the iteration interval
+      cc[i, j] <- func((x[, j] + DD[, i]), ...) - func((x[,j] - DD[, i]), ...) 
     }
   }
   return(rowSums(cc))
+}
+
+
+
+# Stepwise replacement decomposition algorithm (from DemoDecomp)
+
+decomp_step <- function (func, pars1, pars2, symmetrical = TRUE, direction = "up", 
+          ...) 
+{
+  # Clean up
+  direction <- tolower(direction)
+  stopifnot(direction %in% c("up", "down", "both"))
+  up <- direction %in% c("up", "both")
+  down <- direction %in% c("down", "both")
+  
+  # Setup
+  N <- length(pars1)
+  # parameters for the two populations
+  pars1Mat <- matrix(pars1, ncol = N + 1, nrow = N)
+  pars2Mat <- matrix(pars2, ncol = N + 1, nrow = N)
+  # Empty matrices for calculation
+  RM_1_2_up <- matrix(ncol = N + 1, nrow = N)
+  RM_1_2_down <- RM_1_2_up
+  RM_2_1_up <- RM_1_2_up
+  RM_2_1_down <- RM_1_2_up
+  
+  # Fill in the matrices for substitution from population 1 to population 2
+  # Determine the right succession of parameters from population 1 and population 2 
+  r1ind <- lower.tri(pars1Mat, TRUE)
+  r2ind <- upper.tri(pars1Mat)
+  
+  RM_1_2_up[r1ind] <- pars1Mat[r1ind]  # Fill matrix' lower triangle with parameters from population 1
+  RM_1_2_up[r2ind] <- pars2Mat[r2ind]  # Fill matrix' upper triangle with parameters from population 2
+
+  RM_1_2_down[r1ind[N:1, ]] <- pars1Mat[r1ind[N:1, ]] # Invert the triangle for inverse direction
+  RM_1_2_down[r2ind[N:1, ]] <- pars2Mat[r2ind[N:1, ]]
+  
+  # Fill in the matrices for substitution from population 2 to population 1
+  RM_2_1_up[r1ind] <- pars2Mat[r1ind]
+  RM_2_1_up[r2ind] <- pars1Mat[r2ind]
+  RM_2_1_down[r1ind[N:1, ]] <- pars2Mat[r1ind[N:1, ]]
+  RM_2_1_down[r2ind[N:1, ]] <- pars1Mat[r2ind[N:1, ]]
+  
+  # Empty results matrix
+  dec <- matrix(NA, nrow = N, ncol = 4)
+  
+  # Substitute based on chosen settings
+  if (up) {
+    dec[, 1] <- diff(apply(RM_1_2_up, 2, func, ...))
+  }
+  if (down) {
+    dec[, 2] <- diff(apply(RM_1_2_down, 2, func, ...))
+  }
+  if (symmetrical) {
+    if (up) {
+      dec[, 3] <- -diff(apply(RM_2_1_up, 2, func, ...))
+    }
+    if (down) {
+      dec[, 4] <- -diff(apply(RM_2_1_down, 2, func, ...))
+    }
+  }
+  dec_avg <- rowMeans(dec, na.rm = TRUE)
+  dec_avg
 }
