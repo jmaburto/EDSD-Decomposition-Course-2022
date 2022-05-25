@@ -46,10 +46,6 @@ In order to use this function, we need to define another function, which estimat
 
 ```{r}
 e0.frommx
-
-# there are also other functions
-sd.frommx
-rG.frommx
 ```
 
 Now we can perform the decomposition following the arguments of the function. We’ll get a vector with the age-specific contributions to the change in life expectancy.
@@ -99,6 +95,10 @@ Let's do the same with lifespan disparity
 
 ```{r}
 edagger.frommx
+
+# there are also other functions
+sd.frommx
+rG.frommx
 
 #Now we can perfom the decomposition
 results_edag <- horiuchi(func = edagger.frommx, pars1 = mx1, pars2 = mx2, N = 100)
