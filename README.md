@@ -55,6 +55,10 @@ With data on fertility (e.g. HFD) select 3 countries and analyze the change in t
 ### Challenge 2
 Challenge 2: Use prevalence lifetables (you can use data from EurOHex) and the Sullivan method to calculate healthy life expectancy for females and males in a country of your choosing. What does this tell us about morbidity and mortality for females and males? Then decompose the life expectancy sex gap by age using the Arriaga method. Which ages are driving the gap?
 
+### Challenge 3
+Use the linear integral model to decompose the change in the standard deviation of the age-at-death distribution and life expectancy by age and cause of death for 3 countries you might be interested in (over time or between them). Interpret the results of life expectancy alongside standard deviation. Make it interesting.
+You can use data from HCoD, HMD, WHO, GBD.
+
 ## Readings
 #### Day 1
 Kitagawa, Evelyn M. ‘Components of a Difference Between Two Rates’. Journal of the American Statistical Association 50, no. 272 (1955): 1168–94. https://doi.org/10.2307/2281213.
