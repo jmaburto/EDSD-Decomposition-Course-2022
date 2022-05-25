@@ -185,3 +185,12 @@ ggplot(data=results_step_edag, aes(x=age, y=contribution, fill=cause)) +
   ggtitle(bquote(~'Change in '~ e[15]^"\u2020" ~'2005-2015' )) +
   geom_bar(stat = "identity", position = "stack")
 ```
+
+Let's compare the two methods
+
+```{r}
+results$contribution - results_step$contribution
+
+results_edag$contribution - results_step_edag$contribution
+
+```
