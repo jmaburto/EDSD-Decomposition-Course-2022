@@ -117,7 +117,7 @@ edagger.frommxc <- function(mxcvec,sex=1, start.age=1){
 
 
 # Standard deviation
-sd.frommx <- function(mx,sex=1, age,start.age=1){
+sd.frommx <- function(mx,sex=1, age=16:109,start.age=1){
   i.openage <- length(mx)
   OPENAGE   <- i.openage - 1
   RADIX     <- 1
@@ -167,7 +167,7 @@ Gini.fun <- function (x, nax, ndx, ex) {
 }
 
 
-rG.frommx <- function(mx=pars1,sex=1,age,start.age=1){
+rG.frommx <- function(mx,sex=1,age,start.age=1){
   i.openage <- length(mx)
   OPENAGE   <- i.openage - 1
   RADIX     <- 1
@@ -209,8 +209,8 @@ rG.frommxc <- function(mxcvec,sex=1,age,start.age=1){
 
 decomp_cont <- function (func, pars1, pars2, N, ...) 
 {
-  y1 <- rG.frommx(pars1,age=unique(data$age))
-  y2 <- rG.frommx(pars2,age=unique(data$age))
+  y1 <- func(pars1, ...)
+  y2 <- func(pars2, ...)
   d <- pars2 - pars1 # difference between each parameter
   n <- length(pars1)
 

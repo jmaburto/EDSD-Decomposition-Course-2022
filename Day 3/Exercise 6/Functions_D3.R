@@ -209,8 +209,8 @@ rG.frommxc <- function(mxcvec,sex=1,age,start.age=1){
 
 decomp_cont <- function (func, pars1, pars2, N, ...) 
 {
-  y1 <- rG.frommx(pars1,age=unique(data$age))
-  y2 <- rG.frommx(pars2,age=unique(data$age))
+  y1 <- func(pars1,...)
+  y2 <- func(pars2,...)
   d <- pars2 - pars1 # difference between each parameter
   n <- length(pars1)
 
