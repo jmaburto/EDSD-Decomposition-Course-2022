@@ -1,3 +1,6 @@
+# Decomposition class - EDSD 2022
+# FUNCTIONS AND INFORMATION FOR DAY 4
+
 Sullivan.fun = function (rates,age=seq(start.age,open.age,5), sex='f') {
   # 1) First, we split from our single vector 'rates' the set of age-specific death rates (mx) and age-specific prevalence of disability (wx)
   lengthvec <- length(rates)

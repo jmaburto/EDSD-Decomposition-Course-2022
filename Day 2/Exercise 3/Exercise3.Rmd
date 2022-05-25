@@ -45,7 +45,7 @@ data <- data %>%
 
 ```
 
-Let's plot healthy life expectancy at age 50.
+That's it! We now have our healhty life expectancy and we could calculate the whole healhty lifetable if we wanted. Now let's look at the results by plotting healthy life expectancy at age 50.
 
 ```{r, warning=F, message=F}
 data %>% 
@@ -83,5 +83,20 @@ data_ex %>%
 
 ```
 
+Another way to look at healthy life expectancy is to calculate which percentage of total life expectancy is represented by healthy life expectancy (roughly, how much of the life expectancy is spent in good health)
 
+```{r, message=F, warning=F}
+
+data %>% 
+  # We need to express healhty life expectancy as a proportion of total life expectancy
+  mutate(prop = ex_healthy/ex) %>% 
+  filter(age=="50-54") %>% 
+  ggplot(aes(x=year, y=prop*100, linetype=country)) + 
+  ggtitle("Healthy life expectancy vs total life expectancy at 50") +
+  geom_point(aes(shape=country)) +
+  geom_smooth(aes(linetype=country), se=F) +
+  scale_y_continuous("%") +
+  scale_x_continuous("Year")
+
+```
 

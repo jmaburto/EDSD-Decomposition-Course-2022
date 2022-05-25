@@ -24,7 +24,7 @@ library(tidyverse)
 source("Functions_D4.R")
 ```
 
-We have a function to obtain healthy life expectancy using the Sullivan method. Letøs take a look
+We have a function to obtain healthy life expectancy using the Sullivan method. Let's take a look
 ```{r}
 #we need age-cause specific mortality rates in each period
 Sullivan.fun
@@ -65,7 +65,7 @@ healthyex2 <- Sullivan.fun(rates=mxwx2)
 filter(data, year==1990,age==65) %>% pull(ex) - filter(data, year==1970,age==65) %>% pull(ex)
 
 ```
-What does this tell us about the improvement in mortality and morbity for US women between 1970 and 1990?
+What does this tell us about the improvement in mortality and morbidity for US women between 1970 and 1990?
 
 Now let's see how each age contributed to the changes in healthy life expectancy, using both the continuous change and the stepwise functions in the DemoDecomp package
 ```{r}
@@ -103,7 +103,7 @@ HE_sw <- HE_sw %>%
   pivot_longer(cols=c("mortality","morbidity"),names_to="type",values_to="contribution" )
 ```
 
-Let's check that the decomspositionsn yielded realistic results
+Let's check that the decomspositions yielded realistic results
 
 ```{r}
 sum(HE_cont$contribution)
