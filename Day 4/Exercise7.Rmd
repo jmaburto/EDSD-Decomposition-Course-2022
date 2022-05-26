@@ -26,7 +26,7 @@ source("Functions_D4.R")
 
 We have a function to obtain healthy life expectancy using the Sullivan method. Let's take a look
 ```{r}
-#we need age-cause specific mortality rates in each period
+# function based on vector of rates
 Sullivan.fun
 ```
 
@@ -103,7 +103,7 @@ HE_sw <- HE_sw %>%
   pivot_longer(cols=c("mortality","morbidity"),names_to="type",values_to="contribution" )
 ```
 
-Let's check that the decomspositions yielded realistic results
+Let's check that the decompositions yielded realistic results
 
 ```{r}
 sum(HE_cont$contribution)
@@ -121,7 +121,7 @@ Now let's plot the results
 ggplot(data=HE_cont, aes(x=as.factor(age), y=contribution, fill=type)) +
   geom_bar(stat = "identity", position = "stack") +
   geom_hline(yintercept=0, linetype= "dashed", color = "gray50", size=0.5) +
-  scale_x_discrete(labels=c("65-69", "70-74", "75-79", "80-84", "85+")) +
+  scale_x_discrete("age", labels=c("65-69", "70-74", "75-79", "80-84", "85+")) +
   scale_fill_viridis_d(option="H")
 
 ```
@@ -132,7 +132,9 @@ ggplot(data=HE_cont, aes(x=as.factor(age), y=contribution, fill=type)) +
 ggplot(data=HE_sw, aes(x=as.factor(age), y=contribution, fill=type)) +
   geom_bar(stat = "identity", position = "stack") +
   geom_hline(yintercept=0, linetype= "dashed", color = "gray50", size=0.5) +
-  scale_x_discrete(labels=c("65-69", "70-74", "75-79", "80-84", "85+")) +
+  scale_x_discrete("age", labels=c("65-69", "70-74", "75-79", "80-84", "85+")) +
   scale_fill_viridis_d(option="H")
 
 ```
+
+How did each age contribute to the change in healthy life expectancy? Are the contributions similar in terms of mortality and morbidity?
