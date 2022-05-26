@@ -47,6 +47,8 @@ Competing risks review
 
 Spread-Allocation-Timing decomposition
 
+Decomposing healthy life expectancy
+
 Formal Demography
 
 ### Challenge 1
@@ -117,6 +119,8 @@ Goldman, Noreen, and Graham Lord. ‘A New Look at Entropy and the Life Table’
 Aburto, José Manuel, Francisco Villavicencio, Ugofilippo Basellini, Søren Kjærgaard, and James W. Vaupel. ‘Dynamics of Life Expectancy and Life Span Equality’. Proceedings of the National Academy of Sciences 117, no. 10 (10 March 2020): 5250–59. https://doi.org/10.1073/pnas.1915884117.
 
 Aburto, José Manuel, Jesús-Adrián Alvarez-Martínez, Francisco Villavicencio, and James W. Vaupel. ‘The Threshold Age of the Lifetable Entropy’. Demographic Research 41 (9 July 2019): 83–102. https://doi.org/10.4054/DemRes.2019.41.4.
+
+van Raalte, Alyson A., and Marília R. Nepomuceno. ‘Decomposing Gaps in Healthy Life Expectancy’. In International Handbook of Health Expectancies, edited by Carol Jagger, Eileen M. Crimmins, Yasuhiko Saito, Renata Tiene De Carvalho Yokota, Herman Van Oyen, and Jean-Marie Robine, 107–22. International Handbooks of Population. Cham: Springer International Publishing, 2020. https://doi.org/10.1007/978-3-030-37668-0_7.
 
 ## Teams
 
